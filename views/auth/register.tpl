@@ -18,17 +18,33 @@
 </head>
 <body>
     <div class="container">
-        <div class="row mt-5 justify-content-center">
+        <div class="row mt-2 justify-content-center">
             <div class="col-lg-6">
                 <h1 class="my-4">Login Form</h1>
                     <div id="alert"></div>
                     <div class="form-group mb-2">
-                        <label for="username">Username</label>
+                        <label for="first_name">First name*</label>
+                        <input type="text" name="first_name" id="first_name" class="form-control" required>
+                    </div>
+                    <div class="form-group mb-2">
+                        <label for="last_name">Last name*</label>
+                        <input type="text" name="last_name" id="last_name" class="form-control" required>
+                    </div>
+                    <div class="form-group mb-2">
+                        <label for="username">Username*</label>
                         <input type="text" name="username" id="username" class="form-control" required>
                     </div>
                     <div class="form-group mb-2">
-                        <label for="password">Password</label>
-                        <input type="password" name="password" id="password" class="form-control" required>
+                        <label for="email">Email*</label>
+                        <input type="email" name="email" id="email" class="form-control" required>
+                    </div>
+                    <div class="form-group mb-2">
+                        <label for="password1">Password*</label>
+                        <input type="password" name="password1" id="password1" class="form-control" required>
+                    </div>
+                    <div class="form-group mb-2">
+                        <label for="password2">Password Confirm*</label>
+                        <input type="password" name="password2" id="password2" class="form-control" required>
                     </div>
                     <button id="loginHandler" type="submit" class="btn btn-primary">Login</button>
             </div>
@@ -43,16 +59,41 @@
 
     <script>
         $("#loginHandler").on("click", function() {
+            var firstName = $("#first_name").val();
+            var lastName = $("#last_name").val();
             var username = $("#username").val();
-            var password = $("#password").val();
+            var email = $("#email").val();
+            var password1 = $("#password1").val();
+            var password2 = $("#password2").val();
+
+            if (password1 != password2) {
+                var div = document.createElement("div")
+                div.classList.add("alert")
+                div.classList.add("alert-danger")
+                div.classList.add("alert-dismissible")
+                div.setAttribute("role", "alert")
+                div.innerText = "Please enter password and password confirmation.";
+
+                var btnClose = document.createElement("button");
+                btnClose.classList.add("btn-close");
+                btnClose.setAttribute("data-bs-dismiss", "alert");
+
+                div.appendChild(btnClose)
+
+                $("#alert").append(div);
+                return
+            }
 
             $.ajax({
-                url: "/api/v1/auth/user/login",
+                url: "/api/v1/auth/user/register",
                 type: "post",
                 dataType: "json",
                 data: {
                     "username": username,
-                    "password": password,
+                    "password": password1,
+                    "first_name": firstName,
+                    "last_name": lastName,
+                    "email": email,
                 },
                 success: function(response) {
                     if (response.status == "error") {
@@ -62,6 +103,21 @@
                         div.classList.add("alert-dismissible")
                         div.setAttribute("role", "alert")
                         div.innerText = response.message;
+
+                        var btnClose = document.createElement("button");
+                        btnClose.classList.add("btn-close");
+                        btnClose.setAttribute("data-bs-dismiss", "alert");
+
+                        div.appendChild(btnClose)
+
+                        $("#alert").append(div);
+                    } else if (response.status == "success") {
+                        var div = document.createElement("div")
+                        div.classList.add("alert")
+                        div.classList.add("alert-success")
+                        div.classList.add("alert-dismissible")
+                        div.setAttribute("role", "alert")
+                        div.innerHTML = "Successfully to register. Please login now at <a href=\"/auth/login\">here</a>";
 
                         var btnClose = document.createElement("button");
                         btnClose.classList.add("btn-close");

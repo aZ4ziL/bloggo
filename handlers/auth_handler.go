@@ -10,6 +10,7 @@ import (
 type AuthHandler interface {
 	Login() gin.HandlerFunc
 	Register() gin.HandlerFunc
+	Logout() gin.HandlerFunc
 }
 
 type authHandler struct{}
@@ -49,5 +50,17 @@ func (a authHandler) Register() gin.HandlerFunc {
 			ctx.HTML(http.StatusOK, "auth_register", gin.H{})
 			return
 		}
+	}
+}
+
+// Logout
+func (a authHandler) Logout() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		session := sessions.Default(ctx)
+		session.Clear()
+		session.Delete("user")
+		session.Save()
+
+		ctx.Redirect(http.StatusFound, "/auth/login")
 	}
 }
