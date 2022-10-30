@@ -1,0 +1,70 @@
+* {
+    font-family: 'Josefin Sans', sans-serif;
+}
+
+/* Header */
+.header {
+    background-image: url(../images/jess-bailey-q10VITrVYUM-unsplash.jpg);
+    width: 100%;
+    min-height: 60vh;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    backface-visibility: hidden;
+}
+
+.header .header-box {
+    text-align: center;
+    width: 60%;
+    position: absolute;
+    top: 40%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.header .header-box h1 {
+    font-weight: bold;
+    font-size: 40pt;
+}
+
+.header .header-box p {
+    font-weight: bold;
+}
+
+#navbar {
+    transition: .5s ease-in;
+}
+
+/* Link */
+a.btn,
+button.btn {
+    font-weight: bold;
+}
+
+/* Button To Scroll Top */
+#toTop {
+    position: fixed;
+    bottom: 20px;
+    right: 30px;
+    z-index: 99;
+    border: none;
+    outline: none;
+    background-color: rgb(39, 39, 41);
+    color: white;
+    padding: 15px;
+    border-radius: 4px;
+    text-decoration: none;
+    transition: .5s ease;
+}
+
+#toTop.hide {
+    display: none;
+}
+
+#toTop.show {
+    display: block;
+}
+
+#toTop:hover {
+    background-color: rgb(64, 64, 66);
+}

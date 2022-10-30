@@ -1,3 +1,6 @@
+# github.com/gin-contrib/multitemplate v0.0.0-20220829131020-8c2a8441bc2b
+## explicit; go 1.13
+github.com/gin-contrib/multitemplate
 # github.com/gin-contrib/sessions v0.0.5
 ## explicit; go 1.18
 github.com/gin-contrib/sessions
