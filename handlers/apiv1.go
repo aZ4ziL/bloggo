@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 	"strconv"
@@ -21,8 +20,7 @@ type APIV1 interface {
 	GetAllCategories() gin.HandlerFunc
 
 	// Article
-	GetAllArticles() gin.HandlerFunc
-	CreateNewArticle() gin.HandlerFunc
+	Article() gin.HandlerFunc
 
 	// Comment
 	GetAllCommentsByArticleID() gin.HandlerFunc
@@ -41,26 +39,35 @@ func NewAPIV1() APIV1 {
 }
 
 // GetAllArticle Restfull API return all object of articles
-func (a apiV1) GetAllArticles() gin.HandlerFunc {
+func (a apiV1) Article() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		if slug, ok := ctx.GetQuery("slug"); ok {
-			article, err := models.GetArticleBySlug(slug)
-			if err != nil {
-				http.Error(ctx.Writer, err.Error(), http.StatusNotFound)
-				return
-			}
-			ctx.JSON(http.StatusOK, article)
+		session := sessions.Default(ctx)
+
+		user := session.Get("user")
+		if user == nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{
+				"status":  "not_authenticated",
+				"message": "You not authenticated",
+			})
 			return
 		}
 
-		articles := models.GetAllArticles()
-		ctx.JSON(http.StatusOK, articles)
-	}
-}
+		if ctx.Request.Method == "GET" {
+			if slug, ok := ctx.GetQuery("slug"); ok {
+				article, err := models.GetArticleBySlug(slug)
+				if err != nil {
+					http.Error(ctx.Writer, err.Error(), http.StatusNotFound)
+					return
+				}
+				ctx.JSON(http.StatusOK, article)
+				return
+			}
 
-// CreateNewArticle Restfull api method post to create new article
-func (a apiV1) CreateNewArticle() gin.HandlerFunc {
-	return func(ctx *gin.Context) {
+			articles := models.GetAllArticles()
+			ctx.JSON(http.StatusOK, articles)
+		}
+
+		// Method POST to create new article
 		if ctx.Request.Method == "POST" {
 			categoryIDInt, _ := strconv.Atoi(ctx.PostForm("category_id"))
 			authorIDInt, _ := strconv.Atoi(ctx.PostForm("author_id"))
@@ -122,6 +129,7 @@ func (a apiV1) CreateNewArticle() gin.HandlerFunc {
 			return
 		}
 
+		// Method PUT to update the article
 		if ctx.Request.Method == "PUT" {
 			if id, ok := ctx.GetQuery("id"); ok {
 				idInt, _ := strconv.Atoi(id)
@@ -132,15 +140,24 @@ func (a apiV1) CreateNewArticle() gin.HandlerFunc {
 					return
 				}
 
+				if utils.GetSessionValue(user)["id"].(uint) != article.AuthorID {
+					ctx.JSON(http.StatusForbidden, gin.H{
+						"status":  "error",
+						"message": "Permission danied.",
+					})
+					return
+				}
+
+				if err != nil {
+					http.Error(ctx.Writer, err.Error(), http.StatusNotFound)
+					return
+				}
+
 				logo, err := ctx.FormFile("logo")
 				if err == nil {
 					// Delete old files
 					filename := strings.Replace(article.Logo, "/", "", 1)
-					err := os.Remove(filename)
-					if err != nil {
-						log.Println(err.Error(), filename)
-						return
-					}
+					os.Remove(filename)
 				}
 
 				filename := "media/article/" + logo.Filename
@@ -162,6 +179,34 @@ func (a apiV1) CreateNewArticle() gin.HandlerFunc {
 				ctx.JSON(http.StatusCreated, gin.H{
 					"status":  "success",
 					"message": "Successfully to update this data.",
+				})
+				return
+			}
+		}
+
+		// Mehotd DELETE to delete the article
+		if ctx.Request.Method == "DELETE" {
+			if id, ok := ctx.GetQuery("id"); ok {
+				idInt, _ := strconv.Atoi(id)
+
+				article, err := models.GetArticleByID(uint(idInt))
+				if err != nil {
+					http.Error(ctx.Writer, err.Error(), http.StatusNotFound)
+					return
+				}
+
+				if utils.GetSessionValue(user)["id"].(uint) != article.AuthorID {
+					ctx.JSON(http.StatusForbidden, gin.H{
+						"status":  "error",
+						"message": "Permission danied.",
+					})
+					return
+				}
+
+				models.GetDB().Delete(&article)
+				ctx.JSON(http.StatusOK, gin.H{
+					"status":  "success",
+					"message": "Successfully to delete the article.",
 				})
 				return
 			}
@@ -323,6 +368,7 @@ func (a apiV1) Login() gin.HandlerFunc {
 			}
 
 			userSession := map[string]interface{}{
+				"id":          user.ID,
 				"firstName":   user.FirstName,
 				"lastName":    user.LastName,
 				"fullName":    user.FirstName + " " + user.LastName,

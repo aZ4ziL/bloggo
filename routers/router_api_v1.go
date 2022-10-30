@@ -11,9 +11,10 @@ func RouterAPIV1(r *gin.Engine) *gin.RouterGroup {
 	h := handlers.NewAPIV1()
 
 	// Article
-	api.GET("/article", h.GetAllArticles())
-	api.POST("/article", h.CreateNewArticle())
-	api.PUT("/article", h.CreateNewArticle())
+	api.GET("/article", h.Article())
+	api.POST("/article", h.Article())
+	api.PUT("/article", h.Article())
+	api.DELETE("/article", h.Article())
 
 	// Comment
 	api.GET("/comment", h.GetAllCommentsByArticleID())
