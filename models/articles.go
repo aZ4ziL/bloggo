@@ -13,14 +13,14 @@ const (
 
 type Article struct {
 	ID         uint           `gorm:"primaryKey" json:"id"`
-	CategoryID uint           `gorm:"comment:Foreign Key for category" json:"category_id"`
-	AuthorID   uint           `gorm:"comment:Foreign Key for user" json:"author_id"`
-	Title      string         `gorm:"size:100" json:"title"`
-	Slug       string         `gorm:"size:100;unique;index" json:"slug"`
+	CategoryID uint           `gorm:"comment:Foreign Key for category" json:"category_id" validate:"required"`
+	AuthorID   uint           `gorm:"comment:Foreign Key for user" json:"author_id" validate:"required"`
+	Title      string         `gorm:"size:100" json:"title" validate:"required"`
+	Slug       string         `gorm:"size:100;unique;index" json:"slug" validate:"required"`
 	Logo       string         `gorm:"size:255;null" json:"logo"`
-	Desc       string         `gorm:"size:255" json:"desc"`
-	Content    string         `gorm:"type:longtext" json:"content"`
-	Status     string         `gorm:"default:DRAFTED" json:"status"`
+	Desc       string         `gorm:"size:255" json:"desc" validate:"required"`
+	Content    string         `gorm:"type:longtext" json:"content" validate:"required"`
+	Status     string         `gorm:"default:DRAFTED" json:"status" validate:"required"`
 	Views      int            `gorm:"default:0" json:"views"`
 	UpdatedAt  time.Time      `gorm:"autoUpdateTime:nano" json:"updated_at"`
 	CreatedAt  time.Time      `gorm:"autoCreateTime" json:"created_at"`

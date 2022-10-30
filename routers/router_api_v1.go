@@ -6,11 +6,17 @@ import (
 )
 
 func RouterAPIV1(r *gin.Engine) *gin.RouterGroup {
-	api := r.Group("v1")
+	api := r.Group("/api/v1")
 
 	h := handlers.NewAPIV1()
 
+	// Article
 	api.GET("/article", h.GetAllArticles())
+	api.POST("/article", h.CreateNewArticle())
+	api.PUT("/article", h.CreateNewArticle())
+
+	// Comment
+	api.GET("/comment", h.GetAllCommentsByArticleID())
 
 	api.GET("/category", h.GetAllCategories())
 

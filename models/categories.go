@@ -31,6 +31,6 @@ func GetCategoryBySlug(slug string) (Category, error) {
 // GetAllCategories return all categories
 func GetAllCategories() []Category {
 	var categories []Category
-	db.Model(&Category{}).Find(&categories).Preload("Articles")
+	db.Model(&Category{}).Preload("Articles").Find(&categories)
 	return categories
 }

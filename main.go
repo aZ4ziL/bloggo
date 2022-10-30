@@ -20,6 +20,9 @@ func main() {
 	r := gin.Default()
 	r.SetTrustedProxies([]string{"127.0.0.1"})
 
+	// Media Files
+	r.Static("/media", "./media")
+
 	store := gormsession.NewStore(models.GetDB(), true, []byte("mysecretkey"))
 	r.Use(sessions.Sessions("ginsessionID", store))
 

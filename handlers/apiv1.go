@@ -2,7 +2,11 @@ package handlers
 
 import (
 	"fmt"
+	"log"
 	"net/http"
+	"os"
+	"strconv"
+	"strings"
 
 	"github.com/aZ4ziL/bloggo/models"
 	"github.com/aZ4ziL/bloggo/utils"
@@ -15,7 +19,13 @@ var validate *validator.Validate
 
 type APIV1 interface {
 	GetAllCategories() gin.HandlerFunc
+
+	// Article
 	GetAllArticles() gin.HandlerFunc
+	CreateNewArticle() gin.HandlerFunc
+
+	// Comment
+	GetAllCommentsByArticleID() gin.HandlerFunc
 
 	// User
 	Register() gin.HandlerFunc
@@ -33,14 +43,156 @@ func NewAPIV1() APIV1 {
 // GetAllArticle Restfull API return all object of articles
 func (a apiV1) GetAllArticles() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
+		if slug, ok := ctx.GetQuery("slug"); ok {
+			article, err := models.GetArticleBySlug(slug)
+			if err != nil {
+				http.Error(ctx.Writer, err.Error(), http.StatusNotFound)
+				return
+			}
+			ctx.JSON(http.StatusOK, article)
+			return
+		}
+
 		articles := models.GetAllArticles()
 		ctx.JSON(http.StatusOK, articles)
+	}
+}
+
+// CreateNewArticle Restfull api method post to create new article
+func (a apiV1) CreateNewArticle() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		if ctx.Request.Method == "POST" {
+			categoryIDInt, _ := strconv.Atoi(ctx.PostForm("category_id"))
+			authorIDInt, _ := strconv.Atoi(ctx.PostForm("author_id"))
+
+			var filename string
+			logo, err := ctx.FormFile("logo")
+			if err != nil {
+				filename = ""
+			} else {
+				filename = "media/article/" + logo.Filename
+			}
+
+			article := &models.Article{
+				CategoryID: uint(categoryIDInt),
+				AuthorID:   uint(authorIDInt),
+				Title:      ctx.PostForm("title"),
+				Slug:       ctx.PostForm("slug"),
+				Logo:       "/" + filename,
+				Desc:       ctx.PostForm("desc"),
+				Content:    ctx.PostForm("content"),
+				Status:     ctx.PostForm("status"),
+			}
+
+			validate = validator.New()
+
+			err = validate.Struct(article)
+			if err != nil {
+				if _, ok := err.(*validator.InvalidValidationError); ok {
+					fmt.Println(err)
+					return
+				}
+				errorMessages := []string{}
+				for _, err := range err.(validator.ValidationErrors) {
+					errorMessage := fmt.Sprintf("Error at %s with %s.", err.Field(), err.ActualTag())
+					errorMessages = append(errorMessages, errorMessage)
+				}
+				ctx.JSON(http.StatusOK, gin.H{
+					"status":   "error",
+					"messages": errorMessages,
+				})
+				return
+			}
+
+			err = models.CreateNewArticle(article)
+			if err != nil {
+				http.Error(ctx.Writer, err.Error(), http.StatusBadRequest)
+				return
+			}
+
+			err = ctx.SaveUploadedFile(logo, filename)
+			if err != nil {
+				http.Error(ctx.Writer, err.Error(), http.StatusBadRequest)
+				return
+			}
+
+			ctx.JSON(http.StatusCreated, gin.H{
+				"status": "success",
+			})
+			return
+		}
+
+		if ctx.Request.Method == "PUT" {
+			if id, ok := ctx.GetQuery("id"); ok {
+				idInt, _ := strconv.Atoi(id)
+
+				article, err := models.GetArticleByID(uint(idInt))
+				if err != nil {
+					http.Error(ctx.Writer, err.Error(), http.StatusNotFound)
+					return
+				}
+
+				logo, err := ctx.FormFile("logo")
+				if err == nil {
+					// Delete old files
+					filename := strings.Replace(article.Logo, "/", "", 1)
+					err := os.Remove(filename)
+					if err != nil {
+						log.Println(err.Error(), filename)
+						return
+					}
+				}
+
+				filename := "media/article/" + logo.Filename
+
+				article.Title = ctx.PostForm("title")
+				article.Slug = ctx.PostForm("slug")
+				article.Logo = "/" + filename
+				article.Desc = ctx.PostForm("desc")
+				article.Content = ctx.PostForm("content")
+				article.Status = ctx.PostForm("status")
+
+				models.GetDB().Save(&article)
+
+				if err = ctx.SaveUploadedFile(logo, filename); err != nil {
+					http.Error(ctx.Writer, err.Error(), http.StatusBadRequest)
+					return
+				}
+
+				ctx.JSON(http.StatusCreated, gin.H{
+					"status":  "success",
+					"message": "Successfully to update this data.",
+				})
+				return
+			}
+		}
+	}
+}
+
+// GetAllComments Restfull api return All comments
+func (a apiV1) GetAllCommentsByArticleID() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		if articleID, ok := ctx.GetQuery("article_id"); ok {
+			articleIDInt, _ := strconv.Atoi(articleID)
+			comments := models.GetAllCommentsByArticleID(uint(articleIDInt))
+			ctx.JSON(http.StatusOK, comments)
+			return
+		}
 	}
 }
 
 // GetAllCategories Restfull API return all object of categories
 func (a apiV1) GetAllCategories() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
+		if slug, ok := ctx.GetQuery("slug"); ok {
+			category, err := models.GetCategoryBySlug(slug)
+			if err != nil {
+				http.Error(ctx.Writer, err.Error(), http.StatusNotFound)
+				return
+			}
+			ctx.JSON(http.StatusOK, category)
+			return
+		}
 		categories := models.GetAllCategories()
 		ctx.JSON(http.StatusOK, categories)
 	}
