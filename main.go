@@ -33,6 +33,7 @@ func main() {
 	r.Use(sessions.Sessions("ginsessionID", store))
 
 	routers.AuthRouter(r)
+	routers.BlogRouter(r)
 	routers.RouterAPIV1(r)
 
 	r.Run(":8000")
