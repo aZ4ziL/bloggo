@@ -7,6 +7,7 @@ require (
 	github.com/gin-contrib/sessions v0.0.5
 	github.com/gin-gonic/gin v1.8.1
 	github.com/go-playground/validator/v10 v10.10.0
+	github.com/yuin/goldmark v1.5.2
 	golang.org/x/crypto v0.0.0-20210711020723-a769d52b0f97
 	gorm.io/driver/mysql v1.4.3
 	gorm.io/gorm v1.24.0

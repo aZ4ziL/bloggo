@@ -41,17 +41,6 @@ func NewAPIV1() APIV1 {
 // GetAllArticle Restfull API return all object of articles
 func (a apiV1) Article() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		session := sessions.Default(ctx)
-
-		user := session.Get("user")
-		if user == nil {
-			ctx.JSON(http.StatusBadRequest, gin.H{
-				"status":  "not_authenticated",
-				"message": "You not authenticated",
-			})
-			return
-		}
-
 		if ctx.Request.Method == "GET" {
 			if slug, ok := ctx.GetQuery("slug"); ok {
 				article, err := models.GetArticleBySlug(slug)
@@ -124,13 +113,25 @@ func (a apiV1) Article() gin.HandlerFunc {
 			}
 
 			ctx.JSON(http.StatusCreated, gin.H{
-				"status": "success",
+				"status":  "success",
+				"message": "Successfully to create new article.",
 			})
 			return
 		}
 
 		// Method PUT to update the article
 		if ctx.Request.Method == "PUT" {
+			session := sessions.Default(ctx)
+			user := session.Get("user")
+
+			if user == nil {
+				ctx.JSON(http.StatusOK, gin.H{
+					"status":  "error",
+					"message": "You not logined.",
+				})
+				return
+			}
+
 			if id, ok := ctx.GetQuery("id"); ok {
 				idInt, _ := strconv.Atoi(id)
 
@@ -186,6 +187,17 @@ func (a apiV1) Article() gin.HandlerFunc {
 
 		// Mehotd DELETE to delete the article
 		if ctx.Request.Method == "DELETE" {
+			session := sessions.Default(ctx)
+			user := session.Get("user")
+
+			if user == nil {
+				ctx.JSON(http.StatusOK, gin.H{
+					"status":  "error",
+					"message": "You not logined.",
+				})
+				return
+			}
+
 			if id, ok := ctx.GetQuery("id"); ok {
 				idInt, _ := strconv.Atoi(id)
 
