@@ -1,4 +1,4 @@
-package utils
+package main
 
 import (
 	"text/template"
@@ -6,7 +6,7 @@ import (
 	"github.com/gin-contrib/multitemplate"
 )
 
-func CreateMyRender() multitemplate.Renderer {
+func createMyRender() multitemplate.Renderer {
 	r := multitemplate.NewRenderer()
 
 	// Auth
@@ -23,7 +23,8 @@ func CreateMyRender() multitemplate.Renderer {
 	r.AddFromFilesFuncs(
 		"detail",
 		template.FuncMap{
-			"markdown": Markdown,
+			"markdown":        markdown,
+			"getFullNameByID": getFullNameByID,
 		},
 		"views/blogs/detail.tmpl",
 	)

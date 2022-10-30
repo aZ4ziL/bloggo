@@ -17,7 +17,8 @@ func RouterAPIV1(r *gin.Engine) *gin.RouterGroup {
 	api.DELETE("/article", h.Article())
 
 	// Comment
-	api.GET("/comment", h.GetAllCommentsByArticleID())
+	api.GET("/comment", h.Comment())
+	api.POST("/comment", h.Comment())
 
 	api.GET("/category", h.GetAllCategories())
 
