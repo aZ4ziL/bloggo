@@ -270,16 +270,18 @@ func (a apiV1) Register() gin.HandlerFunc {
 					errorMessages = append(errorMessages, errorMessage)
 				}
 
-				ctx.JSON(http.StatusBadRequest, gin.H{
-					"errors": errorMessages,
+				ctx.JSON(http.StatusOK, gin.H{
+					"status":  "error",
+					"message": errorMessages,
 				})
 				return
 			}
 
 			err = models.CreateNewUser(user)
 			if err != nil {
-				ctx.JSON(http.StatusBadRequest, gin.H{
-					"errors": err.Error(),
+				ctx.JSON(http.StatusOK, gin.H{
+					"message": err.Error(),
+					"status":  "error",
 				})
 				return
 			}

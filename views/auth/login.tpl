@@ -70,6 +70,8 @@
                         div.appendChild(btnClose)
 
                         $("#alert").append(div);
+                    } else {
+                        window.location.href = "/";
                     }
                 }
             })

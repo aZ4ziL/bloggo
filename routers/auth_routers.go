@@ -11,6 +11,6 @@ func AuthRouter(r *gin.Engine) {
 	h := handlers.NewAuthHandler()
 
 	auth.GET("/login", h.Login())
-
+	auth.GET("/logout", h.Logout())
 	auth.GET("/register", h.Register())
 }
