@@ -11,14 +11,13 @@ var db *gorm.DB
 
 func init() {
 	db = GetDB()
-	db.AutoMigrate()
+	db.AutoMigrate(&User{}, &Category{}, &Article{},
+		&Comment{})
 }
 
 func GetDB() *gorm.DB {
 	dsn := "root:rafi213fajri@/bloggo?parseTime=True"
-	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{
-		DisableForeignKeyConstraintWhenMigrating: true,
-	})
+	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
 		log.Fatal(err)
 	}

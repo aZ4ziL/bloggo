@@ -5,7 +5,7 @@ type Category struct {
 	Name     string    `gorm:"size:100" json:"name"`
 	Slug     string    `gorm:"size:100;unique;index" json:"slug"`
 	Logo     string    `gorm:"size:255;null" json:"logo"`
-	Articles []Article `gorm:"foreignKey:CategoryID" json:"articles"`
+	Articles []Article `gorm:"foreignKey:CategoryID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"articles"`
 }
 
 // CreateNewCategory create new category
