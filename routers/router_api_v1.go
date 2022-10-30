@@ -17,6 +17,9 @@ func RouterAPIV1(r *gin.Engine) *gin.RouterGroup {
 	// user
 	api.GET("/auth/user", h.GetUserByUsername())
 	api.POST("/auth/user/register", h.Register())
+	api.POST("/auth/user/login", h.Login())
+	api.GET("/auth/user/login", h.Login())
+	api.GET("/auth/user/logout", h.Logout())
 
 	return api
 }
