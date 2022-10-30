@@ -1,16 +1,17 @@
-package utils
+package main
 
 import (
 	"bytes"
 	"log"
 
+	"github.com/aZ4ziL/bloggo/models"
 	"github.com/yuin/goldmark"
 	"github.com/yuin/goldmark/extension"
 	"github.com/yuin/goldmark/parser"
 	"github.com/yuin/goldmark/renderer/html"
 )
 
-func Markdown(content string) string {
+func markdown(content string) string {
 	md := goldmark.New(
 		goldmark.WithExtensions(extension.GFM),
 		goldmark.WithParserOptions(
@@ -28,4 +29,19 @@ func Markdown(content string) string {
 		return ""
 	}
 	return buf.String()
+}
+
+// Length return length of array
+func lengthComment(objs []interface{}) int {
+	var result int
+	for range objs {
+		result += 1
+	}
+	return result
+}
+
+// GetUserByID
+func getFullNameByID(id uint) string {
+	user, _ := models.GetUserByID(id)
+	return user.FirstName + " " + user.LastName
 }

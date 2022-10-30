@@ -6,7 +6,6 @@ import (
 
 	"github.com/aZ4ziL/bloggo/models"
 	"github.com/aZ4ziL/bloggo/routers"
-	"github.com/aZ4ziL/bloggo/utils"
 	"github.com/gin-contrib/sessions"
 	gormsession "github.com/gin-contrib/sessions/gorm"
 	"github.com/gin-gonic/gin"
@@ -27,7 +26,7 @@ func main() {
 	// Static Files
 	r.Static("/static", "./static")
 
-	r.HTMLRender = utils.CreateMyRender()
+	r.HTMLRender = createMyRender()
 
 	store := gormsession.NewStore(models.GetDB(), true, []byte("mysecretkey"))
 	r.Use(sessions.Sessions("ginsessionID", store))

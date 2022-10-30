@@ -84,6 +84,29 @@
                         </div>
                     </div>
                     <!-- Modal -->
+
+                    <!-- Description -->
+                    <div class="col-xl-12">
+                        <ul class="list-group list-group-horizontal">
+                            <li class="list-group-item">
+                                <i class="fas fa-eye"></i>
+                                {{ .article.Views }}
+                            </li>
+                            <li class="list-group-item">
+                                <i class="fas fa-comments"></i>
+                                {{ .article.Comments | len }}
+                            </li>
+                            <li class="list-group-item">
+                                <i class="text-muted small">{{ .article.Status }}</i>
+                            </li>
+                            <li class="list-group-item">
+                                <i class="fas fa-user"></i>
+                                {{ .article.AuthorID | getFullNameByID }}
+                            </li>
+                        </ul>
+                    </div>
+                    <!-- Description -->
+
                     <div class="col-xl-12 col-md-12 mb-4 mt-4">
                         <img src="{{ .article.Logo }}" alt="" class="img-fluid my-3">
                         <div id="article-content"></div>
@@ -93,8 +116,48 @@
 
                         <hr class="my-5">
 
-                        <form action="" method="post" class="mt-4">
+                        {{ if .article.Comments }}
+                        <h3 class="fw-bold">New Comment</h3>
+                        {{ else }}
+                        <h3 class="fw-bold">No Comment</h3>
+                        {{ end }}
+
+                        <!-- Comment -->
+                        <div class="row">
+                            {{ range .article.Comments }}
+                            {{ if .Approved }}
+                            <div class="col-xl-12 col-md-12 col-sm-12 mb-2" id="comment-id-{{ .ID }}">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h5 class="me-4">{{ .FullName }}</h5>
+                                        <div id="message-comment-{{ .ID }}"></div>
+                                        <script>
+                                            document.getElementById("message-comment-{{ .ID }}").innerHTML = "{{ .Content | markdown }}";
+                                        </script>
+                                        <ul class="list-group list-group-horizontal">
+                                            <li class="list-group-item">
+                                                <i class="fas fa-clock"></i>
+                                                Updated at
+                                                {{ .UpdatedAt.Format "Jan 02, 2006" }}
+                                            </li>
+                                            <li class="list-group-item">
+                                                <i class="fas fa-clock"></i>
+                                                Created at
+                                                {{ .CreatedAt.Format "Jan 02, 2006" }}
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            {{ end }}
+                            {{ end }}
+                        </div>
+
+                        <hr class="mt-5">
+
+                        <form action="/api/v1/comment" method="post" class="mt-4" id="commentForm">
                             <h3>Leave a Comment</h3>
+                            <input type="hidden" name="article_id" id="article_id" value="{{ .article.ID }}">
                             <div class="form-group mb-2">
                                 <label for="full_name">Full Name</label>
                                 <input type="text" name="full_name" id="full_name" class="form-control">
@@ -104,8 +167,8 @@
                                 <input type="email" name="email" id="email" class="form-control">
                             </div>
                             <div class="form-group mb-2">
-                                <label for="message">Message</label>
-                                <textarea name="message" id="message" class="form-control" rows="10"></textarea>
+                                <label for="content">Content</label>
+                                <textarea name="content" id="content" class="form-control" rows="10"></textarea>
                             </div>
                             <div class="d-grid gap-2">
                                 <button type="submit" class="btn btn-dark">Send</button>
@@ -285,7 +348,37 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-OERcA2EqjJCMA+/3y+gxIOqMEjwtxJY7qPCqsdltbNJuaOe923+mo//f6V8Qbsw3"
         crossorigin="anonymous"></script>
+    <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="/static/assets/js/style.js"></script>
+
+    <script>
+        $("#commentForm").submit(function (event) {
+            event.preventDefault();
+            $.ajax({
+                url: $(this).attr("action"),
+                type: $(this).attr("method"),
+                dataType: "JSON",
+                data: $(this).serialize(),
+                success: function (response) {
+                    if (response.status == "success") {
+                        Swal.fire({
+                            icon: "success",
+                            text: response.message,
+                        }).then(result => {
+                            if (result.isConfirmed) {
+                                window.location.href = "/detail/{{ .article.Slug }}" + "#comment-id-" + response.comment_id;
+                            }
+                        })
+                    }
+                },
+                error: function (xhr, status, error) {
+                    alert(xhr.responseText);
+                    alert(status);
+                    alert(error);
+                }
+            });
+        })
+    </script>
 </body>
 
 </html>

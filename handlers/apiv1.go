@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"strconv"
@@ -23,7 +24,7 @@ type APIV1 interface {
 	Article() gin.HandlerFunc
 
 	// Comment
-	GetAllCommentsByArticleID() gin.HandlerFunc
+	Comment() gin.HandlerFunc
 
 	// User
 	Register() gin.HandlerFunc
@@ -52,7 +53,14 @@ func (a apiV1) Article() gin.HandlerFunc {
 				return
 			}
 
-			articles := models.GetAllArticles()
+			articles := []models.Article{}
+
+			articleModel := models.GetAllArticles()
+			for _, v := range articleModel {
+				if v.Status == "PUBLISHED" {
+					articles = append(articles, v)
+				}
+			}
 			ctx.JSON(http.StatusOK, articles)
 		}
 
@@ -226,13 +234,70 @@ func (a apiV1) Article() gin.HandlerFunc {
 	}
 }
 
-// GetAllComments Restfull api return All comments
-func (a apiV1) GetAllCommentsByArticleID() gin.HandlerFunc {
+// Comment Restfull api return All comments
+func (a apiV1) Comment() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		if articleID, ok := ctx.GetQuery("article_id"); ok {
-			articleIDInt, _ := strconv.Atoi(articleID)
-			comments := models.GetAllCommentsByArticleID(uint(articleIDInt))
-			ctx.JSON(http.StatusOK, comments)
+		if ctx.Request.Method == "GET" {
+			if articleID, ok := ctx.GetQuery("article_id"); ok {
+				articleIDInt, _ := strconv.Atoi(articleID)
+				comments := models.GetAllCommentsByArticleID(uint(articleIDInt))
+				ctx.JSON(http.StatusOK, comments)
+				return
+			}
+		}
+
+		if ctx.Request.Method == "POST" {
+			session := sessions.Default(ctx)
+			user := session.Get("user")
+			if user == nil {
+				ctx.JSON(http.StatusForbidden, gin.H{
+					"status":  notLogined,
+					"message": "You not authenticated.",
+				})
+				return
+			}
+
+			articleIDInt, _ := strconv.Atoi(ctx.PostForm("article_id"))
+			comment := models.Comment{
+				FullName:  ctx.PostForm("full_name"),
+				Email:     ctx.PostForm("email"),
+				ArticleID: uint(articleIDInt),
+				Content:   ctx.PostForm("content"),
+			}
+
+			validate = validator.New()
+			err := validate.Struct(&comment)
+			if err != nil {
+				if _, ok := err.(*validator.InvalidValidationError); ok {
+					log.Println(err.Error())
+					return
+				}
+				errorMessages := []string{}
+				for _, err := range err.(validator.ValidationErrors) {
+					errorMessage := fmt.Sprintf("Error at %s with %s.", err.Field(), err.ActualTag())
+					errorMessages = append(errorMessages, errorMessage)
+				}
+				ctx.JSON(http.StatusBadRequest, gin.H{
+					"status":  "error",
+					"message": errorMessages,
+				})
+				return
+			}
+
+			err = models.CreateNewComment(&comment)
+			if err != nil {
+				ctx.JSON(http.StatusBadRequest, gin.H{
+					"status":  "error",
+					"message": err.Error(),
+				})
+				return
+			}
+
+			ctx.JSON(http.StatusCreated, gin.H{
+				"status":     "success",
+				"comment_id": comment.ID,
+				"message":    "Successfully to send comment.",
+			})
 			return
 		}
 	}
@@ -333,7 +398,6 @@ func (a apiV1) GetUserByUsername() gin.HandlerFunc {
 					"last_login":   user.LastLogin,
 					"date_joined":  user.DateJoined,
 					"articles":     user.Articles,
-					"comments":     user.Comments,
 				})
 				return
 			}

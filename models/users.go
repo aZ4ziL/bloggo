@@ -19,7 +19,6 @@ type User struct {
 	LastLogin   time.Time `gorm:"null" json:"last_login"`
 	DateJoined  time.Time `gorm:"autoCreateTime" json:"date_joined"`
 	Articles    []Article `gorm:"foreignKey:AuthorID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"articles"`
-	Comments    []Comment `gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"comments"`
 }
 
 // CreateUser create new user
@@ -32,13 +31,13 @@ func CreateNewUser(user *User) error {
 // GetUserByID get user by passing the ID
 func GetUserByID(id uint) (User, error) {
 	var user User
-	err := db.Model(&User{}).Where("id = ?", id).Preload("Articles").Preload("Comments").First(&user).Error
+	err := db.Model(&User{}).Where("id = ?", id).Preload("Articles").First(&user).Error
 	return user, err
 }
 
 // GetUserByUsername get user by passing the Username
 func GetUserByUsername(username string) (User, error) {
 	var user User
-	err := db.Model(&User{}).Where("username = ?", username).Preload("Articles").Preload("Comments").First(&user).Error
+	err := db.Model(&User{}).Where("username = ?", username).Preload("Articles").First(&user).Error
 	return user, err
 }

@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/aZ4ziL/bloggo/models"
@@ -56,6 +57,19 @@ func (b blogHandler) Detail() gin.HandlerFunc {
 			}
 
 			comments := models.GetAllCommentsByArticleID(article.ID)
+
+			// Session to view
+			viewedArticle := map[string]interface{}{
+				"viewedArticle": fmt.Sprintf("viewed_article__%s", article.Slug),
+			}
+
+			viewedSession := session.Get("viewed_article")
+			if viewedSession == nil {
+				session.Set("viewed_article", viewedArticle)
+				session.Save()
+				article.Views += 1
+				models.GetDB().Save(&article)
+			}
 
 			ctx.HTML(http.StatusOK, "detail", gin.H{
 				"user":     user,

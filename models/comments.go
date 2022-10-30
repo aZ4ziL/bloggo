@@ -4,9 +4,11 @@ import "time"
 
 type Comment struct {
 	ID        uint      `gorm:"primaryKey" json:"id"`
-	UserID    uint      `gorm:"comment:Foreign Key for User ID" json:"user_id"`
-	ArticleID uint      `gorm:"comment:Foreign Key for Article ID" json:"article_id"`
-	Content   string    `gorm:"type:longtext" json:"content"`
+	FullName  string    `gorm:"size:100" json:"full_name" validate:"required"`
+	Email     string    `gorm:"size:100" json:"email" validate:"required,email"`
+	ArticleID uint      `gorm:"comment:Foreign Key for Article ID" json:"article_id" validate:"required,number"`
+	Content   string    `gorm:"type:longtext" json:"content" validate:"required"`
+	Approved  bool      `gorm:"default:0" json:"approved"`
 	UpdatedAt time.Time `gorm:"autoUpdateTime:nano" json:"updated_at"`
 	CreatedAt time.Time `gorm:"autoCreateTime" json:"created_at"`
 }
