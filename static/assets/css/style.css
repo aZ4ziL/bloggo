@@ -68,3 +68,7 @@ button.btn {
 #toTop:hover {
     background-color: rgb(64, 64, 66);
 }
+
+.hljs {
+    font-family: sans-serif !important;
+}
