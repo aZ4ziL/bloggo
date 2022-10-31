@@ -1,0 +1,71 @@
+{{ define "content" }}
+<!-- Content -->
+<div class="container pt-4">
+    <div class="row">
+
+        <!-- Right -->
+        <div class="col-xl-8 col-md-12 mb-4">
+
+            <div class="row" id="search-results">
+                <div class="d-flex align-items-center justify-content-between">
+                    <h1 class="fw-bold">Search Result</h1>
+                </div>
+
+                {{ if .alert_type }}
+                <div class="col-xl-12">
+                    <div class="alert alert-{{ .alert_type }}" role="alert">
+                        {{ .alert_message }}
+                    </div>
+                </div>
+                {{ end }}
+                {{ range .articles }}
+                <div class="col-xl-6 col-md-6 mb-3">
+                    <div class="card shadow h-100">
+                        <img src="{{ .Logo }}" alt="{{ .Title }}" class="card-img-top">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ .Title }}</h5>
+                            <p class="card-text">{{ .Desc }}</p>
+                        </div>
+                        <div class="card-footer d-flex align-items-center justify-content-between">
+                            <a href="/detail/{{ .Slug }}" class="btn btn-primary">Read More</a>
+                        </div>
+                    </div>
+                </div>
+                {{ end }}
+            </div>
+
+        </div>
+        <!-- Right -->
+
+        <!-- Left -->
+        <div class="col-xl-4 col-md-12 mb-4">
+            <h4>Popular Post</h4>
+
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item d-flex align-items-center">
+                    <a href="#">Lorem ipsum dolor, sit amet consectetur adipisicing elit. Magni, asperiores?</a>
+                </li>
+                <li class="list-group-item d-flex align-items-center">
+                    <a href="#">Lorem ipsum dolor, sit amet consectetur adipisicing elit. Magni, asperiores?</a>
+                </li>
+                <li class="list-group-item d-flex align-items-center">
+                    <a href="#">Lorem ipsum dolor, sit amet consectetur adipisicing elit. Magni, asperiores?</a>
+                </li>
+            </ul>
+        </div>
+        <!-- Left -->
+
+    </div>
+</div>
+<!-- Content -->
+{{ end }}
+
+{{ define "script" }}
+<script>
+    window.onload = function () {
+        var o = $("#search-results").offset();
+        var sT = o.top - $("#navbar").outerHeight(true);
+        window.scrollTo(0, sT);
+    }
+</script>
+{{ end }}

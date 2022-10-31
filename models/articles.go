@@ -1,6 +1,7 @@
 package models
 
 import (
+	"strings"
 	"time"
 
 	"gorm.io/gorm"
@@ -53,4 +54,19 @@ func GetAllArticles() []Article {
 	var articles []Article
 	db.Model(&Article{}).Find(&articles)
 	return articles
+}
+
+// GetArticleByFilteringSlug contains slug
+func GetArticleByFilteringQuery(query string) []Article {
+	var results []Article
+
+	articles := GetAllArticles()
+
+	for i := range articles {
+		if strings.Contains(articles[i].Slug, query) || strings.ContainsAny(articles[i].Desc, query) || strings.ContainsAny(articles[i].Content, query) {
+			results = append(results, articles[i])
+		}
+	}
+
+	return results
 }
