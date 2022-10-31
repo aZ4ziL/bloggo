@@ -18,6 +18,8 @@ func createMyRender() multitemplate.Renderer {
 		"index",
 		template.FuncMap{},
 		"views/blogs/base.tmpl",
+		"views/blogs/navbar.tmpl",
+		"views/blogs/footer.tmpl",
 		"views/blogs/index.tmpl",
 	)
 	r.AddFromFilesFuncs(
@@ -27,6 +29,16 @@ func createMyRender() multitemplate.Renderer {
 			"getFullNameByID": getFullNameByID,
 		},
 		"views/blogs/detail.tmpl",
+		"views/blogs/navbar.tmpl",
+		"views/blogs/footer.tmpl",
+	)
+	r.AddFromFilesFuncs(
+		"search",
+		template.FuncMap{},
+		"views/blogs/base.tmpl",
+		"views/blogs/navbar.tmpl",
+		"views/blogs/footer.tmpl",
+		"views/blogs/search.tmpl",
 	)
 
 	return r

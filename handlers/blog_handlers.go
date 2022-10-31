@@ -28,6 +28,29 @@ func (b blogHandler) Index() gin.HandlerFunc {
 		user := session.Get("user")
 
 		if ctx.Request.Method == "GET" {
+			// Search query
+			if q, ok := ctx.GetQuery("q"); ok {
+
+				articles := models.GetArticleByFilteringQuery(q)
+
+				if len(articles) == 0 {
+					ctx.HTML(http.StatusOK, "search", gin.H{
+						"articles":      articles,
+						"alert_type":    "danger",
+						"alert_message": fmt.Sprintf("No result for `%s`.", q),
+						"user":          user,
+					})
+					return
+				}
+
+				ctx.HTML(http.StatusOK, "search", gin.H{
+					"articles":      articles,
+					"user":          user,
+					"alert_type":    "success",
+					"alert_message": fmt.Sprintf("Result for `%s`.", q),
+				})
+				return
+			}
 			categories := models.GetAllCategories()
 			// articles := models.GetAllArticles()
 
