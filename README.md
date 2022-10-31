@@ -8,3 +8,7 @@
     <h1>BlogGo</h1>
     <p>RestFull API WIth Go Language</p>
 </div>
+
+# Docs
+
+Please read the docs
