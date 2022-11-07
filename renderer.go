@@ -6,6 +6,7 @@ import (
 	"github.com/gin-contrib/multitemplate"
 )
 
+// createMyRender return render html
 func createMyRender() multitemplate.Renderer {
 	r := multitemplate.NewRenderer()
 
