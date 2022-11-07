@@ -9,6 +9,8 @@
     <p>RestFull API WIth Go Language with GIN-GONIC</p>
 </div>
 
+## WITH JWT Authentication
+
 # Docs
 
 Please read the docs
