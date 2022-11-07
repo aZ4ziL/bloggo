@@ -35,5 +35,5 @@ func main() {
 	routers.BlogRouter(r)
 	routers.RouterAPIV1(r)
 
-	r.Run(":8000")
+	r.Run(":80")
 }
