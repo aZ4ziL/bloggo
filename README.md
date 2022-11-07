@@ -6,7 +6,7 @@
 
 <div align="center">
     <h1>BlogGo</h1>
-    <p>RestFull API WIth Go Language</p>
+    <p>RestFull API WIth Go Language with GIN-GONIC</p>
 </div>
 
 # Docs
