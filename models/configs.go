@@ -16,7 +16,7 @@ func init() {
 }
 
 func GetDB() *gorm.DB {
-	dsn := "root:rafi213fajri@/bloggo?parseTime=True"
+	dsn := "root:root@/bloggo?parseTime=True"
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{
 		QueryFields: true,
 	})
